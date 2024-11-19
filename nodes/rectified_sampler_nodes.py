@@ -11,21 +11,25 @@ def get_sample_forward(gamma, seed):
 
     @torch.no_grad()
     def sample_forward(model, y0, sigmas, extra_args=None, callback=None, disable=None):
+        #import pdb;pdb.set_trace()
         extra_args = {} if extra_args is None else extra_args
         Y = y0.clone()
         y1 = torch.randn(Y.shape, generator=generator).to(y0.device)
         N = len(sigmas)-1
         s_in = y0.new_ones([y0.shape[0]])
         for i in trange(N, disable=disable):
-            t_i = model.inner_model.inner_model.model_sampling.timestep(sigmas[i])
+            #import pdb;pdb.set_trace()
+            t_i = model.inner_model.inner_model.model_sampling.timestep(sigmas[i])/1000
 
             # 6. Unconditional Vector field uti(Yti) = u(Yti, ti, Φ(“”); φ)
+            #import pdb;pdb.set_trace()
             unconditional_vector_field = model(Y, s_in * sigmas[i], **extra_args) # this implementation takes sigma instead of timestep
             
             # 7.Conditional Vector field  uti(Yti|y1) = (y1−Yti)/1−ti
-            conditional_vector_field = (y1-Y)/(1-t_i)
+            conditional_vector_field = (y1-Y)/(1.0-t_i)
             
             # 8. Controlled Vector field ti(Yti) = uti(Yti) + γ (uti(Yti|y1) − uti(Yti))
+            # xinze: from equation 8
             controlled_vector_field = unconditional_vector_field + gamma * (conditional_vector_field - unconditional_vector_field)
             
             # 9. Next state Yti+1 = Yti + ˆuti(Yti) (σ(ti+1) − σ(ti))
@@ -41,7 +45,7 @@ def get_sample_forward(gamma, seed):
 
 def generate_eta_values(steps, start_time, end_time, eta, eta_trend):
     eta_values = [0] * steps
-    
+
     if eta_trend == 'constant':
         for i in range(start_time, end_time):
             eta_values[i] = eta
@@ -61,15 +65,19 @@ def get_sample_reverse(latent_image, eta, start_time, end_time, eta_trend):
     # Controlled Reverse ODE (Algorithm 2)
     @torch.no_grad()
     def sample_reverse(model, y1, sigmas, extra_args=None, callback=None, disable=None):
+        #import pdb;pdb.set_trace()
         extra_args = {} if extra_args is None else extra_args
         X = y1.clone()
         N = len(sigmas)-1
         y0 = latent_image.clone().to(y1.device)
         s_in = y0.new_ones([y0.shape[0]])
         eta_values = generate_eta_values(N, start_time, end_time, eta, eta_trend)
+        # print(eta_values)
+        # print(sigmas)
         for i in trange(N, disable=disable):
-            # t_i = 1-model.inner_model.inner_model.model_sampling.timestep(sigmas[i]) # TODO: figure out which one to use
-            t_i = i/N # Empiracally better results
+            #import pdb;pdb.set_trace()
+            t_i = 1-model.inner_model.inner_model.model_sampling.timestep(sigmas[i])/1000 # TODO: figure out which one to use
+            #t_i = i/N # Empiracally better results
             sigma = sigmas[i]
 
             # 5. Unconditional Vector field uti(Xti) = -u(Xti, 1-ti, Φ(“prompt”); φ)
@@ -77,8 +85,10 @@ def get_sample_reverse(latent_image, eta, start_time, end_time, eta_trend):
             
             # 6.Conditional Vector field  uti(Xti|y0) = (y0−Xti)/(1−ti)
             conditional_vector_field = (y0-X)/(1-t_i)
+            # xinze: diffuser version do CFG here.
             
-            # 7. Controlled Vector field ti(Yti) = uti(Yti) + γ (uti(Yti|y1) − uti(Yti))
+            # 7. Controlled Vector field ti(Yti) = uti(Yti) + eta (uti(Yti|y1) − uti(Yti))
+            # xinze: from equation 15, default eta is 0.8
             controlled_vector_field = unconditional_vector_field + eta_values[i] * (conditional_vector_field - unconditional_vector_field)
             
             # 8. Next state Yti+1 = Yti + ˆuti(Yti) (σ(ti+1) − σ(ti))
@@ -106,7 +116,9 @@ class FluxForwardODESamplerNode:
     CATEGORY = "fluxtapoz"
 
     def build(self, gamma, seed=0):
-        sampler = KSAMPLER(get_sample_forward(gamma, seed))
+        #import pdb;pdb.set_trace()
+        sampler_func = get_sample_forward(gamma, seed)
+        sampler = KSAMPLER(sampler_func)
 
         return (sampler, )
 
