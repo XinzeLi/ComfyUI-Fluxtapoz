@@ -42,8 +42,8 @@ class InFluxModelSamplingPredNode:
         mm = (max_shift - base_shift) / (x2 - x1)
         b = base_shift - mm * x1
         shift = (width * height / (8 * 8 * 2 * 2)) * mm + b
-
-        sampling_base = comfy.model_sampling.ModelSamplingFlux
+        shift = 3.0
+        sampling_base = comfy.model_sampling.ModelSamplingDiscreteFlow
         sampling_type = InverseCONST
 
         class ModelSamplingAdvanced(sampling_base, sampling_type):
@@ -60,6 +60,7 @@ class OutCONST:
         return noise
 
     def calculate_denoised(self, sigma, model_output, model_input):
+        #import pdb;pdb.set_trace()
         sigma = sigma.view(sigma.shape[:1] + (1,) * (model_output.ndim - 1))
         return model_input - model_output * sigma
 
@@ -75,6 +76,7 @@ class ReverseCONST:
         return noise
 
     def calculate_denoised(self, sigma, model_output, model_input):
+        #import pdb;pdb.set_trace()
         sigma = sigma.view(sigma.shape[:1] + (1,) * (model_output.ndim - 1))
         return model_output # model_input - model_output * sigma
 
@@ -109,8 +111,9 @@ class OutFluxModelSamplingPredNode:
         mm = (max_shift - base_shift) / (x2 - x1)
         b = base_shift - mm * x1
         shift = (width * height / (8 * 8 * 2 * 2)) * mm + b
-
-        sampling_base = comfy.model_sampling.ModelSamplingFlux
+        shift = 3.0
+        # import pdb;pdb.set_trace()
+        sampling_base = comfy.model_sampling.ModelSamplingDiscreteFlow
         if reverse_ode:
             sampling_type = ReverseCONST
         else:
@@ -120,6 +123,7 @@ class OutFluxModelSamplingPredNode:
             pass
 
         model_sampling = ModelSamplingAdvanced(model.model.model_config)
+        #import pdb;pdb.set_trace()
         model_sampling.set_parameters(shift=shift)
         m.add_object_patch("model_sampling", model_sampling)
         return (m, )
