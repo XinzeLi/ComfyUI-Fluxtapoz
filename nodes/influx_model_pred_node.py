@@ -60,7 +60,6 @@ class OutCONST:
         return noise
 
     def calculate_denoised(self, sigma, model_output, model_input):
-        #import pdb;pdb.set_trace()
         sigma = sigma.view(sigma.shape[:1] + (1,) * (model_output.ndim - 1))
         return model_input - model_output * sigma
 
@@ -76,7 +75,6 @@ class ReverseCONST:
         return noise
 
     def calculate_denoised(self, sigma, model_output, model_input):
-        #import pdb;pdb.set_trace()
         sigma = sigma.view(sigma.shape[:1] + (1,) * (model_output.ndim - 1))
         return model_output # model_input - model_output * sigma
 
@@ -112,7 +110,6 @@ class OutFluxModelSamplingPredNode:
         b = base_shift - mm * x1
         shift = (width * height / (8 * 8 * 2 * 2)) * mm + b
         shift = 3.0
-        # import pdb;pdb.set_trace()
         sampling_base = comfy.model_sampling.ModelSamplingDiscreteFlow
         if reverse_ode:
             sampling_type = ReverseCONST
@@ -123,7 +120,6 @@ class OutFluxModelSamplingPredNode:
             pass
 
         model_sampling = ModelSamplingAdvanced(model.model.model_config)
-        #import pdb;pdb.set_trace()
         model_sampling.set_parameters(shift=shift)
         m.add_object_patch("model_sampling", model_sampling)
-        return (m, ) # useless comment
+        return (m, )
