@@ -126,4 +126,4 @@ class OutFluxModelSamplingPredNode:
         #import pdb;pdb.set_trace()
         model_sampling.set_parameters(shift=shift)
         m.add_object_patch("model_sampling", model_sampling)
-        return (m, )
+        return (m, ) # useless comment
