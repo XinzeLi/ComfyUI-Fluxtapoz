@@ -42,8 +42,8 @@ class InFluxModelSamplingPredNode:
         mm = (max_shift - base_shift) / (x2 - x1)
         b = base_shift - mm * x1
         shift = (width * height / (8 * 8 * 2 * 2)) * mm + b
-        shift = 3.0
-        sampling_base = comfy.model_sampling.ModelSamplingDiscreteFlow
+
+        sampling_base = comfy.model_sampling.ModelSamplingFlux
         sampling_type = InverseCONST
 
         class ModelSamplingAdvanced(sampling_base, sampling_type):
@@ -54,6 +54,40 @@ class InFluxModelSamplingPredNode:
         m.add_object_patch("model_sampling", model_sampling)
         return (m, )
 
+class InSDModelSamplingPredNode:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": { "model": ("MODEL",),
+                              "shift": ("FLOAT", {"default": 3.0, "min": 0.0, "max": 100.0, "step":0.01}),
+                            #   "base_shift": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 100.0, "step":0.01}),
+                              "width": ("INT", {"default": 1024, "min": 16, "max": nodes.MAX_RESOLUTION, "step": 8}),
+                              "height": ("INT", {"default": 1024, "min": 16, "max": nodes.MAX_RESOLUTION, "step": 8}),
+                              }}
+
+    RETURN_TYPES = ("MODEL",)
+    FUNCTION = "patch"
+
+    CATEGORY = "fluxtapoz"
+
+    def patch(self, model, shift, width, height):
+        m = model.clone()
+
+        # x1 = 256
+        # x2 = 4096
+        # mm = (max_shift - base_shift) / (x2 - x1)
+        # b = base_shift - mm * x1
+        # shift = (width * height / (8 * 8 * 2 * 2)) * mm + b
+
+        sampling_base = comfy.model_sampling.ModelSamplingDiscreteFlow
+        sampling_type = InverseCONST
+
+        class ModelSamplingAdvanced(sampling_base, sampling_type):
+            pass
+
+        model_sampling = ModelSamplingAdvanced(model.model.model_config)
+        model_sampling.set_parameters(shift=shift)
+        m.add_object_patch("model_sampling", model_sampling)
+        return (m, )
 
 class OutCONST:
     def calculate_input(self, sigma, noise):
@@ -109,7 +143,46 @@ class OutFluxModelSamplingPredNode:
         mm = (max_shift - base_shift) / (x2 - x1)
         b = base_shift - mm * x1
         shift = (width * height / (8 * 8 * 2 * 2)) * mm + b
-        shift = 3.0
+
+        sampling_base = comfy.model_sampling.ModelSamplingFlux
+        if reverse_ode:
+            sampling_type = ReverseCONST
+        else:
+            sampling_type = OutCONST
+
+        class ModelSamplingAdvanced(sampling_base, sampling_type):
+            pass
+
+        model_sampling = ModelSamplingAdvanced(model.model.model_config)
+        model_sampling.set_parameters(shift=shift)
+        m.add_object_patch("model_sampling", model_sampling)
+        return (m, )
+
+class OutSDModelSamplingPredNode:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": { "model": ("MODEL",),
+                              "shift": ("FLOAT", {"default": 3.0, "min": 0.0, "max": 100.0, "step":0.01}),
+                            #   "base_shift": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 100.0, "step":0.01}),
+                              "width": ("INT", {"default": 1024, "min": 16, "max": nodes.MAX_RESOLUTION, "step": 8}),
+                              "height": ("INT", {"default": 1024, "min": 16, "max": nodes.MAX_RESOLUTION, "step": 8}),
+                              "reverse_ode": ("BOOLEAN", {"default": True}),
+                              }}
+
+    RETURN_TYPES = ("MODEL",)
+    FUNCTION = "patch"
+
+    CATEGORY = "fluxtapoz"
+
+    def patch(self, model, shift, width, height, reverse_ode=False):
+        m = model.clone()
+
+        # x1 = 256
+        # x2 = 4096
+        # mm = (max_shift - base_shift) / (x2 - x1)
+        # b = base_shift - mm * x1
+        # shift = (width * height / (8 * 8 * 2 * 2)) * mm + b
+
         sampling_base = comfy.model_sampling.ModelSamplingDiscreteFlow
         if reverse_ode:
             sampling_type = ReverseCONST
