@@ -4,10 +4,10 @@ from .nodes.influx_model_pred_node import InFluxModelSamplingPredNode, OutFluxMo
 from .nodes.flux_deguidance_node import FluxDeGuidance
 from .nodes.inverse_sampler_node import FluxInverseSamplerNode
 from .nodes.configure_modified_flux_node import ConfigureModifiedFluxNode
-from .nodes.influx_model_pred_node import InSDModelSamplingPredNode, OutSDModelSamplingPredNode
+from .nodes.influx_model_pred_node import InSD35ModelSamplingPredNode, OutSD35ModelSamplingPredNode
 from .nodes.mix_noise_node import FluxNoiseMixerNode
 from .nodes.rectified_sampler_nodes import FluxForwardODESamplerNode, FluxReverseODESamplerNode
-from .nodes.rectified_sampler_nodes import SDForwardODESamplerNode, SDReverseODESamplerNode
+from .nodes.rectified_sampler_nodes import SD35ForwardODESamplerNode, SD35ReverseODESamplerNode
 from .nodes.rf_edit_sampler_nodes import FlowEditForwardSamplerNode, FlowEditReverseSamplerNode, PrepareAttnBankNode, RFSingleBlocksOverrideNode, RFDoubleBlocksOverrideNode
 ## Enhance
 from .nodes.attn_override_node import FluxAttnOverrideNode
@@ -30,13 +30,13 @@ NODE_CLASS_MAPPINGS = {
     "FluxDeGuidance": FluxDeGuidance,
     "FluxInverseSampler": FluxInverseSamplerNode,
     "FluxNoiseMixer": FluxNoiseMixerNode,
-    "InSDModelSamplingPred": InSDModelSamplingPredNode,
-    "OutSDModelSamplingPred": OutSDModelSamplingPredNode,
+    "InSD35ModelSamplingPred": InSD35ModelSamplingPredNode,
+    "OutSD35ModelSamplingPred": OutSD35ModelSamplingPredNode,
     ### RF-Inversion
     "FluxForwardODESampler": FluxForwardODESamplerNode,
     "FluxReverseODESampler": FluxReverseODESamplerNode,
-    "SDForwardODESampler": SDForwardODESamplerNode,
-    "SDReverseODESampler": SDReverseODESamplerNode,
+    "SD35ForwardODESampler": SD35ForwardODESamplerNode,
+    "SD35ReverseODESampler": SD35ReverseODESamplerNode,
     ### RF-Edit
     "FlowEditForwardSampler": FlowEditForwardSamplerNode,
     "FlowEditReverseSampler": FlowEditReverseSamplerNode,
@@ -61,16 +61,16 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "InFluxFlipSigmas": "Flip Flux Sigmas",
     "InFluxModelSamplingPred": "Inverse Flux Model Pred",
     "OutFluxModelSamplingPred": "Outverse Flux Model Pred",
-    "InSDModelSamplingPred": "Inverse SD Model Pred",
-    "OutSDModelSamplingPred": "Outverse SD Model Pred",
+    "InSD35ModelSamplingPred": "Inverse SD3.5 Model Pred",
+    "OutSD35ModelSamplingPred": "Outverse SD3.5 Model Pred",
     "FluxDeGuidance": "Flux DeGuidance",
     "FluxInverseSampler": "Flux Inverse Sampler",
     "FluxNoiseMixer": "Flux Mix Noise",
     ### RF-Inversion
     "FluxForwardODESampler": "Flux Forward ODE Sampler",
     "FluxReverseODESampler": "Flux Reverse ODE Sampler",
-    "SDForwardODESampler": "SD Forward ODE Sampler",
-    "SDReverseODESampler": "SD Reverse ODE Sampler",
+    "SD35ForwardODESampler": "SD3.5 Forward ODE Sampler",
+    "SD35ReverseODESampler": "SD3.5 Reverse ODE Sampler",
     ### RF-Edit
     "FlowEditForwardSampler": "RF-Edit Forward Sampler",
     "FlowEditReverseSampler": "RF-Edit Reverse Sampler",

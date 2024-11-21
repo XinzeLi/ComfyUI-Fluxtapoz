@@ -54,12 +54,11 @@ class InFluxModelSamplingPredNode:
         m.add_object_patch("model_sampling", model_sampling)
         return (m, )
 
-class InSDModelSamplingPredNode:
+class InSD35ModelSamplingPredNode:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": { "model": ("MODEL",),
                               "shift": ("FLOAT", {"default": 3.0, "min": 0.0, "max": 100.0, "step":0.01}),
-                            #   "base_shift": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 100.0, "step":0.01}),
                               "width": ("INT", {"default": 1024, "min": 16, "max": nodes.MAX_RESOLUTION, "step": 8}),
                               "height": ("INT", {"default": 1024, "min": 16, "max": nodes.MAX_RESOLUTION, "step": 8}),
                               }}
@@ -77,6 +76,8 @@ class InSDModelSamplingPredNode:
         # mm = (max_shift - base_shift) / (x2 - x1)
         # b = base_shift - mm * x1
         # shift = (width * height / (8 * 8 * 2 * 2)) * mm + b
+        # xinze: might need this computation for future use. Flux use these code to compute the shift, but
+        # I will let user to customize this parameter for SD3.5 model.
 
         sampling_base = comfy.model_sampling.ModelSamplingDiscreteFlow
         sampling_type = InverseCONST
@@ -158,12 +159,11 @@ class OutFluxModelSamplingPredNode:
         m.add_object_patch("model_sampling", model_sampling)
         return (m, )
 
-class OutSDModelSamplingPredNode:
+class OutSD35ModelSamplingPredNode:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": { "model": ("MODEL",),
                               "shift": ("FLOAT", {"default": 3.0, "min": 0.0, "max": 100.0, "step":0.01}),
-                            #   "base_shift": ("FLOAT", {"default": 0.5, "min": 0.0, "max": 100.0, "step":0.01}),
                               "width": ("INT", {"default": 1024, "min": 16, "max": nodes.MAX_RESOLUTION, "step": 8}),
                               "height": ("INT", {"default": 1024, "min": 16, "max": nodes.MAX_RESOLUTION, "step": 8}),
                               "reverse_ode": ("BOOLEAN", {"default": True}),
@@ -182,6 +182,8 @@ class OutSDModelSamplingPredNode:
         # mm = (max_shift - base_shift) / (x2 - x1)
         # b = base_shift - mm * x1
         # shift = (width * height / (8 * 8 * 2 * 2)) * mm + b
+        # xinze: might need this computation for future use. Flux use these code to compute the shift, but
+        # I will let user to customize this parameter for SD3.5 model.
 
         sampling_base = comfy.model_sampling.ModelSamplingDiscreteFlow
         if reverse_ode:

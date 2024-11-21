@@ -38,7 +38,7 @@ def get_sample_forward(gamma, seed):
 
     return sample_forward
 
-def get_SD_sample_forward(gamma, seed):
+def get_SD35_sample_forward(gamma, seed):
     # Controlled Forward ODE (Algorithm 1)
     generator = torch.Generator()
     generator.manual_seed(seed)
@@ -101,7 +101,7 @@ def get_sample_reverse(latent_image, eta, start_time, end_time, eta_trend):
         s_in = y0.new_ones([y0.shape[0]])
         eta_values = generate_eta_values(N, start_time, end_time, eta, eta_trend)
         for i in trange(N, disable=disable):
-            # t_i = 1-model.inner_model.inner_model.model_sampling.timestep(sigmas[i]) # TODO: figure out which one to use
+            # t_i = 1-model.inner_model.inner_model.model_sampling.timestep(sigmas[i]) # It seems this timestep is not good for Flux model
             t_i = i/N # Empiracally better results
             sigma = sigmas[i]
 
@@ -124,7 +124,7 @@ def get_sample_reverse(latent_image, eta, start_time, end_time, eta_trend):
     
     return sample_reverse
 
-def get_SD_sample_reverse(latent_image, eta, start_time, end_time, eta_trend):
+def get_SD35_sample_reverse(latent_image, eta, start_time, end_time, eta_trend):
     # Controlled Reverse ODE (Algorithm 2)
     @torch.no_grad()
     def sample_reverse(model, y1, sigmas, extra_args=None, callback=None, disable=None):
@@ -176,7 +176,7 @@ class FluxForwardODESamplerNode:
 
         return (sampler, )
 
-class SDForwardODESamplerNode:
+class SD35ForwardODESamplerNode:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": { 
@@ -190,7 +190,7 @@ class SDForwardODESamplerNode:
     CATEGORY = "fluxtapoz"
 
     def build(self, gamma, seed=0):
-        sampler = KSAMPLER(get_SD_sample_forward(gamma, seed))
+        sampler = KSAMPLER(get_SD35_sample_forward(gamma, seed))
 
         return (sampler, )
 
@@ -218,7 +218,7 @@ class FluxReverseODESamplerNode:
 
         return (sampler, )
 
-class SDReverseODESamplerNode:
+class SD35ReverseODESamplerNode:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": { 
@@ -238,6 +238,6 @@ class SDReverseODESamplerNode:
     def build(self, model, latent_image, eta, start_step, end_step, eta_trend='constant'):
         process_latent_in = model.get_model_object("process_latent_in")
         latent_image = process_latent_in(latent_image['samples'])
-        sampler = KSAMPLER(get_SD_sample_reverse(latent_image, eta, start_step, end_step, eta_trend))
+        sampler = KSAMPLER(get_SD35_sample_reverse(latent_image, eta, start_step, end_step, eta_trend))
 
         return (sampler, )
